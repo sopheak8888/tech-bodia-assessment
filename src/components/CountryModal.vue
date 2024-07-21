@@ -52,13 +52,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, defineProps, defineEmits, type PropType } from 'vue';
 import { fetchCountry } from '@/services/CountryService';
 import type { Country } from '@/types/Country.ts';
 
 const props = defineProps({
   isVisible: Boolean,
-  country: Object
+  country: Object as PropType<Country | null>,
 });
 
 const emit = defineEmits(['update:isVisible']);
@@ -74,7 +74,7 @@ watch(() => props.country, (newCountry) => {
   if (newCountry?.cca2 !== undefined) {
     loading.value = true;
     fetchCountry(newCountry.cca2).then((data) => {
-      countryInfo.value = data;
+      countryInfo.value = data as Country;
       loading.value = false;
     });
   }
