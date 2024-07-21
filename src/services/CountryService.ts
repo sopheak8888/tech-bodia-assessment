@@ -1,12 +1,11 @@
 import type { Country } from '@/types/Country'
 import axios from 'axios'
+import fuse from 'fuse.js'
 
 const API_URL = 'https://restcountries.com/v3.1/'
 
-const fetchData = async (searchQuery: string, fields: string) => {
-  const apiUrl = searchQuery
-    ? `${API_URL}name/${searchQuery}?fullText=false&fields=${fields}`
-    : `${API_URL}all?fields=${fields}`
+const fetchData = async (fields: string) => {
+  const apiUrl = `${API_URL}all?fields=${fields}`
   return axios.get(apiUrl)
 }
 
@@ -22,6 +21,18 @@ const paginateResults = (countries: Country[], page: number, pageSize: number) =
   return countries.slice(startIndex, startIndex + pageSize)
 }
 
+const fuzzySearch = (searchQuery: string, country: Country[]) => {
+  if (!searchQuery) return country
+  const query = searchQuery.toLowerCase()
+  const options = {
+    keys: [{ name: 'name.official', weight: 2 }],
+    threshold: 0.4
+  }
+  const fuseInstance = new fuse(country, options)
+  const result = fuseInstance.search(query)
+  return result.map((result) => result.item)
+}
+
 export const fetchCountries = async (
   searchQuery = '',
   page = 1,
@@ -30,8 +41,8 @@ export const fetchCountries = async (
 ): Promise<Country[]> => {
   try {
     const fields = 'flags,name,cca2,cca3,altSpellings,idd'
-    const response = await fetchData(searchQuery, fields)
-    let countries = response.data as Country[]
+    const response = await fetchData(fields)
+    let countries = fuzzySearch(searchQuery, response.data) as Country[]
     countries = sortCountries(countries, sortAsc)
     return paginateResults(countries, page, pageSize)
   } catch (error) {
