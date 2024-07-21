@@ -18,14 +18,14 @@
           <p>Independent: {{ countryInfo?.independent ? 'Yes' : 'No' }}</p>
           <p>Status: {{ countryInfo?.status }}</p>
           <p>UN Member: {{ countryInfo?.unMember ? 'Yes' : 'No' }}</p>
-          <p>Currencies: {{ Object?.values(countryInfo?.currencies)?.map(currency => currency?.name)?.join(', ') }}</p>
+          <p>Currencies: {{ Object.values(countryInfo?.currencies ?? {})?.map(currency => currency?.name)?.join(', ') }}</p>
           <p>IDD Root: {{ countryInfo?.idd?.root }}</p>
           <p>IDD Suffixes: {{ countryInfo?.idd?.suffixes?.join(', ') }}</p>
           <p>Capital: {{ countryInfo?.capital?.join(', ') }}</p>
           <p>Alt Spellings: {{ countryInfo?.altSpellings?.join(', ') }}</p>
           <p>Region: {{ countryInfo?.region }}</p>
           <p>Subregion: {{ countryInfo?.subregion }}</p>
-          <p>Languages: {{ Object?.values(countryInfo?.languages)?.join(', ') }}</p>
+          <p>Languages: {{ Object?.values(countryInfo?.languages ?? {})?.join(', ') }}</p>
           <p>Lat, Lng: {{ countryInfo?.latlng?.join(', ') }}</p>
           <p>Landlocked: {{ countryInfo?.landlocked ? 'Yes' : 'No' }}</p>
           <p>Borders: {{ countryInfo?.borders?.join(', ') }}</p>
@@ -51,36 +51,32 @@
   </div>
 </template>
 
-<script lang="ts">
-import { fetchCountry } from '@/services/CountryService'
-import type { Country } from '@/types/Country.ts'
+<script setup lang="ts">
+import { ref, watch } from 'vue';
+import { fetchCountry } from '@/services/CountryService';
+import type { Country } from '@/types/Country.ts';
 
-export default {
-  props: ['isVisible', 'country'],
-  methods: {
-    closeModal() {
-      this.$emit('update:isVisible', false);
-    },
-  },
-  data() {
-    return {
-      loading: false,
-      countryInfo: {} as Country
-    }
-  },
-  watch: {
-    country: {
-      immediate: true,
-      handler() {
-        if (this.country?.cca2 !== undefined) {
-          this.loading = true;
-          fetchCountry(this.country.cca2).then((data) => {
-            this.countryInfo = data as Country;
-            this.loading = false;
-          })
-        }
-      }
-    }
+const props = defineProps({
+  isVisible: Boolean,
+  country: Object
+});
+
+const emit = defineEmits(['update:isVisible']);
+
+const loading = ref(false);
+const countryInfo = ref({} as Country);
+
+const closeModal = () => {
+  emit('update:isVisible', false);
+};
+
+watch(() => props.country, (newCountry) => {
+  if (newCountry?.cca2 !== undefined) {
+    loading.value = true;
+    fetchCountry(newCountry.cca2).then((data) => {
+      countryInfo.value = data;
+      loading.value = false;
+    });
   }
-}
+});
 </script>
