@@ -57,7 +57,6 @@ export const fetchCountries = async (
 export const fetchCountry = async (cca3: string): Promise<Country | undefined> => {
   try {
     const response = await axios.get(API_URL + 'alpha/' + cca3)
-    console.log(response)
     return response.data[0]
   } catch (error) {
     return undefined
