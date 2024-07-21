@@ -80,7 +80,11 @@ const submitSearch = () => {
 }
 
 watch([page, sort], () => {
-  router.push({ query: { page: page.value.toString(), sort: sort.value.toString() } })
+  router.push({
+    query: search.value === ''
+      ? { page: page.value.toString(), sort: sort.value.toString() }
+      : { search: search.value, page: page.value.toString(), sort: sort.value.toString() }
+  })
   fetchData()
 })
 
