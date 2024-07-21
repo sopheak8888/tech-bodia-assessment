@@ -53,6 +53,7 @@
 
 <script lang="ts">
 import { fetchCountry } from '@/services/CountryService'
+import type { Country } from '@/types/Country.ts'
 
 export default {
   props: ['isVisible', 'country'],
@@ -60,14 +61,11 @@ export default {
     closeModal() {
       this.$emit('update:isVisible', false);
     },
-    formatCurrencies(currencies) {
-      return Object.values(currencies).map(currency => `${currency.name} (${currency.symbol})`).join(', ');
-    }
   },
   data() {
     return {
       loading: false,
-      countryInfo: {}
+      countryInfo: {} as Country
     }
   },
   watch: {
@@ -77,7 +75,7 @@ export default {
         if (this.country?.cca2 !== undefined) {
           this.loading = true;
           fetchCountry(this.country.cca2).then((data) => {
-            this.countryInfo = data
+            this.countryInfo = data as Country;
             this.loading = false;
           })
         }

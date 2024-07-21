@@ -10,25 +10,25 @@ const fetchData = async (searchQuery: string, fields: string) => {
   return axios.get(apiUrl)
 }
 
-const mapData = (response: any) =>
-  response.data.map((country: any) => ({
-    flagsPng: country.flags.png,
-    countryName: country.name.official,
-    cca2: country.cca2,
-    cca3: country.cca3,
-    nativeCountryName: JSON.stringify(country.name.nativeName)
-      .replace(/"(\w{2,3})?":{"official":"(.+?)","common":".+?"}/g, '$1: $2</br>')
-      .replace(/[{,}]/g, ''),
-    altSpellings: country.altSpellings.join(', '),
-    callingCode:
-      country.idd.root + (country.idd.suffixes.length === 1 ? country.idd.suffixes[0] : '')
-  }))
+// const mapData = (response: any) =>
+//   response.data.map((country: any) => ({
+//     flagsPng: country.flags.png,
+//     countryName: country.name.official,
+//     cca2: country.cca2,
+//     cca3: country.cca3,
+//     nativeCountryName: JSON.stringify(country.name.nativeName)
+//       .replace(/"(\w{2,3})?":{"official":"(.+?)","common":".+?"}/g, '$1: $2</br>')
+//       .replace(/[{,}]/g, ''),
+//     altSpellings: country.altSpellings.join(', '),
+//     callingCode:
+//       country.idd.root + (country.idd.suffixes.length === 1 ? country.idd.suffixes[0] : '')
+//   }))
 
 const sortCountries = (countries: Country[], sortAsc: boolean) =>
   countries.sort((a, b) =>
     sortAsc
-      ? a.countryName.localeCompare(b.countryName)
-      : b.countryName.localeCompare(a.countryName)
+      ? a.name.official.localeCompare(b.name.official)
+      : b.name.official.localeCompare(a.name.official)
   )
 
 const paginateResults = (countries: Country[], page: number, pageSize: number) => {
@@ -45,11 +45,11 @@ export const fetchCountries = async (
   try {
     const fields = 'flags,name,cca2,cca3,altSpellings,idd'
     const response = await fetchData(searchQuery, fields)
-    let countries = mapData(response) as Country[]
+    let countries = response.data as Country[]
     countries = sortCountries(countries, sortAsc)
-    countries = paginateResults(countries, page, pageSize)
-    return countries
+    return paginateResults(countries, page, pageSize)
   } catch (error) {
+    console.error(error)
     return []
   }
 }

@@ -31,13 +31,13 @@
           </thead>
           <tbody>
             <tr v-for="country in countries" :key="country.cca3" @click="showModal(country)" class="bg-white border-b hover:bg-gray-100">
-              <td class="px-4 py-2"><img :src="country.flagsPng" alt="Flag" class="h-6 w-10"></td>
-              <td class="px-4 py-2">{{ country.countryName }}</td>
+              <td class="px-4 py-2"><img :src="country.flags.png" alt="Flag" class="h-6 w-10"></td>
+              <td class="px-4 py-2">{{ country.name.official }}</td>
               <td class="px-4 py-2">{{ country.cca2 }}</td>
               <td class="px-4 py-2">{{ country.cca3 }}</td>
-              <td class="px-4 py-2" v-html="country.nativeCountryName"></td>
-              <td class="px-4 py-2">{{ country.altSpellings }}</td>
-              <td class="px-4 py-2">{{ country.callingCode }}</td>
+              <td class="px-4 py-2" v-html="formattedNativeName(country.name.nativeName)"></td>
+              <td class="px-4 py-2">{{ country.altSpellings.join(', ') }}</td>
+              <td class="px-4 py-2">{{ country.idd.root + (country.idd.suffixes.length === 1 ? country.idd.suffixes[0] : '') }}</td>
             </tr>
           </tbody>
         </table>
@@ -50,7 +50,7 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue'
 import { fetchCountries } from '@/services/CountryService'
-import type { Country } from '@/types'
+import type { Country } from '@/types/Country.ts'
 import CountryModal from '@/components/CountryModal.vue'
 import { useRouter } from 'vue-router'
 
@@ -84,6 +84,12 @@ watch([page, sort], () => {
   fetchData()
 })
 
+const formattedNativeName = (nativeName: string) => {
+  return JSON.stringify(nativeName)
+    .replace(/"(\w{2,3})?":{"official":"(.+?)","common":".+?"}/g, '$1: $2</br>')
+    .replace(/[{,}]/g, '');
+}
+    
 onMounted(() => {
   fetchData()
 })
