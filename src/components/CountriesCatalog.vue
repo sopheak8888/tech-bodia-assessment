@@ -75,12 +75,12 @@ const showModal = (country: Country) => {
 
 const submitSearch = () => {
   page.value = 1
-  router.push({ path: window.location.pathname, query: { search: search.value, page: page.value.toString(), sort: sort.value.toString() } })
+  router.push({ query: { search: search.value, page: page.value.toString(), sort: sort.value.toString() } })
   fetchData()
 }
 
 watch([page, sort], () => {
-  router.push({ path: window.location.pathname, query: { page: page.value.toString(), sort: sort.value.toString() } })
+  router.push({ query: { page: page.value.toString(), sort: sort.value.toString() } })
   fetchData()
 })
 
